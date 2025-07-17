@@ -152,7 +152,7 @@ export const verifyUser = async (req, res) => {
     res.status(200).json({
       con: true,
       message: "User verified successfully",
-      user: {
+      result: {
         _id: user._id,
         name: user.name,
         email: user.email,
@@ -259,7 +259,7 @@ export const loginUser = async (req, res) => {
     res.status(200).json({
       con: true,
       message: "Login successful",
-      user: {
+      result: {
         _id: user._id,
         name: user.name,
         email: user.email,
@@ -305,7 +305,7 @@ export const getUserProfile = async (req, res) => {
     );
     res.status(200).json({
       con: true,
-      user: {
+      result: {
         _id: user._id,
         name: user.name,
         email: user.email,

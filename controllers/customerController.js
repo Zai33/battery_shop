@@ -12,7 +12,7 @@ export const getAllCustomers = async (req, res) => {
     res.status(200).json({
       con: true,
       message: "Customers fetched successfully",
-      customers: customers,
+      result: customers,
     });
   } catch (error) {
     console.error("Error fetching customers:", error);
@@ -37,7 +37,7 @@ export const getCustomerById = async (req, res) => {
     res.status(200).json({
       con: true,
       message: "Customer fetched successfully",
-      customer: customer,
+      result: customer,
     });
   } catch (error) {
     console.log("Error fetching customer:", error);
@@ -68,7 +68,7 @@ export const createCustomer = async (req, res) => {
     res.status(201).json({
       con: true,
       message: "Customer created successfully",
-      customer: newCustomer,
+      result: newCustomer,
     });
   } catch (error) {
     console.error("Error creating customer:", error);

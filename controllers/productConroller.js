@@ -25,7 +25,7 @@ export const getAllProducts = async (req, res) => {
       currentPage: page,
       totalPages: totalPages,
       totalCount: totalCount,
-      products: products,
+      result: products,
     });
   } catch (error) {
     console.log("Error fetching products:", error);
@@ -84,7 +84,7 @@ export const createProduct = async (req, res) => {
     res.status(201).json({
       con: true,
       message: "Product created successfully",
-      product: newProduct,
+      result: newProduct,
     });
   } catch (error) {
     console.log("Error creating product:", error);
@@ -155,7 +155,7 @@ export const updateAllProductFields = async (req, res) => {
     res.status(200).json({
       con: true,
       message: "Product fully updated successfully",
-      product: updatedProduct,
+      result: updatedProduct,
     });
   } catch (error) {
     console.log("Error updating product:", error);
@@ -195,7 +195,7 @@ export const updatePartialProductFields = async (req, res) => {
     res.status(200).json({
       con: true,
       message: "Product successfully updated",
-      product: updatedProduct,
+      result: updatedProduct,
     });
   } catch (error) {
     console.log("Error updating product:", error);
@@ -207,6 +207,7 @@ export const updatePartialProductFields = async (req, res) => {
   }
 };
 
+//delete product
 export const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -231,6 +232,7 @@ export const deleteProduct = async (req, res) => {
   }
 };
 
+//get products by category
 export const getProductsByCategory = async (req, res) => {
   try {
     const { categoryId } = req.params;
@@ -254,7 +256,7 @@ export const getProductsByCategory = async (req, res) => {
       totalPages,
       totalProducts: totalCount,
       count: products.length,
-      products,
+      result: products,
     });
   } catch (error) {
     console.error("Error fetching products by category:", error);

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const supplierSchema = new mongoose.Schema(
   {
-    name: {
+    companyName: {
       type: String,
       required: true,
       trim: true,

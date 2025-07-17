@@ -9,6 +9,9 @@ import { createDefaultAdmin } from "./utils/defaultAdmin.js";
 import authroute from "./routes/authRoute.js";
 import saleRoute from "./routes/saleRoute.js";
 import customerRoute from "./routes/customerRoute.js";
+import productRoute from "./routes/productsRoute.js";
+import productCategoryRoute from "./routes/productCategoryRoute.js";
+import supplierRoute from "./routes/supplierRoute.js"; // Import supplier routes
 
 dotenv.config();
 
@@ -27,6 +30,9 @@ app.use(morgan("dev")); // Log HTTP requests
 app.use(`${api}/auth`, authroute); // Use auth routes
 app.use(`${api}/sale`, saleRoute); // Use sale routes
 app.use(`${api}/customer`, customerRoute); // Use customer routes
+app.use(`${api}/product`, productRoute); // Use product routes
+app.use(`${api}/category`, productCategoryRoute); //User category routes
+app.use(`${api}/supplier`, supplierRoute); // Use supplier routes
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}${api}`);

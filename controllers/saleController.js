@@ -13,7 +13,7 @@ export const getAllSales = async (req, res) => {
       con: true,
       message: "Sales retrieved successfully",
       count: sales.length,
-      data: sales,
+      result: sales,
     });
   } catch (error) {
     console.error("Error retrieving sales:", error);
@@ -110,7 +110,7 @@ export const createSale = async (req, res) => {
     res.status(201).json({
       con: true,
       message: "Sale created successfully",
-      data: savedSale,
+      result: savedSale,
     });
   } catch (error) {
     if (error.name === "ValidationError") {

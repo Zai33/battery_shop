@@ -9,7 +9,7 @@ const productCategorySchema = new mongoose.Schema(
         "Solar",
         "Inverter",
         "UPS",
-        "Motorcycle",
+        "Motorcycle", 
         "Electric bike",
         "Other",
       ],
