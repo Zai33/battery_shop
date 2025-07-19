@@ -15,8 +15,12 @@ export const getAllProducts = async (req, res) => {
     const totalPages = Math.ceil(totalCount / limit);
     if (!products || products.length === 0) {
       return res.status(404).json({
-        con: false,
+        con: true,
         message: "No products found",
+        currentPage: page,
+        totalPages: totalPages,
+        totalCount: totalCount,
+        result: [],
       });
     }
     res.status(200).json({
