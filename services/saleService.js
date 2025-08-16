@@ -1,7 +1,7 @@
 import Sale from "../models/saleModel.js";
 import { generateInvoiceNumber } from "../utils/generateInvoiceNumber.js";
 
-export const createSaleService = async (data, userId) => {
+export const createSaleService = async (data, userId, session = null) => {
   const invoiceNumber = await generateInvoiceNumber();
 
   const newSale = new Sale({
@@ -10,7 +10,7 @@ export const createSaleService = async (data, userId) => {
     createdBy: userId,
   });
 
-  return await newSale.save();
+  return await newSale.save({ session });
 };
 
 export const getAllSalesService = async () => {

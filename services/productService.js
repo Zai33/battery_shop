@@ -3,7 +3,12 @@ import Product from "../models/productModel.js";
 export const getAllProductsService = async (page = 1, limit = 10) => {
   const skip = (page - 1) * limit;
   const [products, totalCount] = await Promise.all([
-    Product.find().skip(skip).limit(limit),
+    Product.find()
+      .populate("category", "type")
+      .populate("supplier", "companyName")
+      .skip(skip)
+      .limit(limit),
+
     Product.countDocuments(),
   ]);
   return { products, totalCount };
@@ -23,8 +28,8 @@ export const getProductsByCategoryService = async (
 
   const [products, totalCount] = await Promise.all([
     Product.find({ category: categoryId })
-      .populate("category", "name")
-      .populate("supplier", "name")
+      .populate("category", "type")
+      .populate("supplier", "companyName")
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 }),

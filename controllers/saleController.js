@@ -3,6 +3,9 @@ import {
   getAllSalesService,
 } from "../services/saleService.js";
 import Customer from "../models/customerMode.js";
+import Product from "../models/productModel.js";
+import Buyback from "../models/buyBackModel.js";
+import mongoose from "mongoose";
 
 // Get all sales
 export const getAllSales = async (req, res) => {
@@ -27,6 +30,8 @@ export const getAllSales = async (req, res) => {
 
 // Create a new sale
 export const createSale = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     const {
       customer,
@@ -42,12 +47,12 @@ export const createSale = async (req, res) => {
       paidAmount,
       changeGiven,
       isPaid,
-      warrantyExpiry,
+      buybackData,
     } = req.body;
 
     // Basic validation
     if (
-      !customer ||
+      (!customer && !customerInfo) ||
       !product ||
       !batteryCategory ||
       !quantity ||
@@ -69,14 +74,14 @@ export const createSale = async (req, res) => {
       // Try to find customer by phone number
       let existingCustomer = await Customer.findOne({
         phone: customerInfo.phone,
-      });
+      }).session(session);
 
       if (existingCustomer) {
         customerId = existingCustomer._id;
       } else {
         // Create new customer
         const newCustomer = new Customer(customerInfo);
-        const savedCustomer = await newCustomer.save();
+        const savedCustomer = await newCustomer.save({ session });
         customerId = savedCustomer._id;
       }
     }
@@ -89,6 +94,74 @@ export const createSale = async (req, res) => {
       });
     }
 
+    // Check product stock
+    const productDoc = await Product.findById(product).session(session);
+    if (!productDoc || productDoc.quantity < quantity) {
+      return res.status(400).json({
+        con: false,
+        message: "Insufficient stock for this product",
+      });
+    }
+
+    // Step 3: Handle Buybacks (if any)
+    const buybackIds = [];
+
+    if (rebuyOldBattery && Array.isArray(buybackData)) {
+      for (const item of buybackData) {
+        const {
+          batteryType,
+          condition,
+          quantity: bbQuantity,
+          buyPrice,
+          inspectionNote,
+          reused,
+        } = item;
+
+        if (
+          !batteryType ||
+          !condition ||
+          !bbQuantity ||
+          !buyPrice ||
+          reused === undefined
+        ) {
+          await session.abortTransaction();
+          session.endSession();
+          return res.status(400).json({
+            con: false,
+            message: "Invalid buyback data provided",
+          });
+        }
+
+        const newBuyback = new Buyback({
+          customer: customerId,
+          batteries: [
+            {
+              batterySize: batteryType,
+              condition,
+              quantity: bbQuantity,
+              buyPrice,
+              inspectionNote,
+              reused,
+            },
+          ],
+          createdBy: req.user._id,
+        });
+
+        const savedBuyback = await newBuyback.save({ session });
+        buybackIds.push(savedBuyback._id);
+      }
+    }
+
+    // Calculate warranty
+    let warrantyExpiry = null;
+    if (batteryCategory === "new") {
+      warrantyExpiry = new Date();
+      warrantyExpiry.setMonth(warrantyExpiry.getMonth() + 6);
+    } else if (batteryCategory === "second") {
+      warrantyExpiry = new Date();
+      warrantyExpiry.setMonth(warrantyExpiry.getMonth() + 3);
+    }
+
     const saleData = {
       customer: customerId,
       product,
@@ -98,6 +171,7 @@ export const createSale = async (req, res) => {
       oldBatteryPrice,
       totalPrice,
       rebuyOldBattery,
+      buyback: buybackIds,
       paymentMethod,
       paidAmount,
       changeGiven,
@@ -105,7 +179,27 @@ export const createSale = async (req, res) => {
       warrantyExpiry,
     };
 
-    const savedSale = await createSaleService(saleData, req.user._id);
+    const savedSale = await createSaleService(saleData, req.user._id, session);
+
+    // Update product quantity
+    await Product.findByIdAndUpdate(
+      product,
+      { $inc: { quantity: -quantity } },
+      { session }
+    );
+
+    //Link sale to buybacks
+    if (buybackIds.length > 0) {
+      await Buyback.updateMany(
+        { _id: { $in: buybackIds } },
+        { $set: { sale: savedSale._id } },
+        { session }
+      );
+    }
+
+    // Commit transaction
+    await session.commitTransaction();
+    session.endSession();
 
     res.status(201).json({
       con: true,
@@ -113,6 +207,9 @@ export const createSale = async (req, res) => {
       result: savedSale,
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+
     if (error.name === "ValidationError") {
       return res.status(400).json({
         con: false,

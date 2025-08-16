@@ -215,7 +215,7 @@ export const updatePartialProductFields = async (req, res) => {
 export const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await Product.fidnByIdAndDelete(id);
+    const product = await Product.findByIdAndDelete(id);
     if (!product) {
       return res.status(404).json({
         con: false,
