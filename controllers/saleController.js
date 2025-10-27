@@ -223,4 +223,4 @@ export const createSale = async (req, res) => {
       error: error.message,
     });
   }
-};
+};  

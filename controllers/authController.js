@@ -6,7 +6,7 @@ import { generateOpt, sendOptEmail } from "../utils/otpService.js";
 
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password, comfirmPassword } = req.body;
+    const { name, email, password, confirmPassword } = req.body;
 
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     // Validate email format
@@ -18,7 +18,7 @@ export const registerUser = async (req, res) => {
     }
 
     // Validate required fields
-    if (!email || !password || !comfirmPassword || !name) {
+    if (!email || !password || !confirmPassword || !name) {
       return res.status(400).json({
         con: false,
         message: "Please fill all required fields",
@@ -43,7 +43,7 @@ export const registerUser = async (req, res) => {
     }
 
     // Check if password and confirm password match
-    if (password !== comfirmPassword) {
+    if (password !== confirmPassword) {
       return res.status(400).json({
         con: false,
         message: "Passwords do not match",
@@ -219,10 +219,10 @@ export const resendOpt = async (req, res) => {
   }
 };
 
-// login user
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
+    // login user
     // Validate required fields
     if (!email || !password) {
       return res.status(400).json({
@@ -320,5 +320,20 @@ export const getUserProfile = async (req, res) => {
       message: "Internal server error",
       error: error.message,
     });
+  }
+};
+
+export const checkAuth = async (req, res) => {
+  try {
+    const token = req.cookies.jwt;
+    if (!token) {
+      return res.json({ loggedIn: false });
+    }
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) return res.json({ loggedIn: false });
+      return res.json({ loggedIn: true, userId: decoded.userId });
+    });
+  } catch (error) {
+    return res.json({ loggedIn: false });
   }
 };

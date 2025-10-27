@@ -14,7 +14,7 @@ export const sendOptEmail = async (email, otp) => {
       },
     });
     const mailOptions = {
-      from: process.env.EMAIL,
+      from: process.env.EMAIL_HOST,
       to: email,
       subject: "Your OTP Code",
       html: `
