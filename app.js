@@ -24,7 +24,14 @@ const app = express();
 app.use(express.json()); // Parse JSON bodies
 app.use(bodyParser.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(bodyParser.json()); // Parse JSON bodies
-app.use(cors()); // Enable CORS
+app.use(
+  cors({
+    origin: "http://localhost:3000", // Next.js URL
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+); // Enable CORS
 app.use(cookieParser()); // Parse cookies
 app.use(morgan("dev")); // Log HTTP requests
 

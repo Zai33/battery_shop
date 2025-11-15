@@ -235,7 +235,7 @@ export const loginUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         con: false,
-        message: "User not found",
+        message: "Please set valid Email Address",
       });
     }
 

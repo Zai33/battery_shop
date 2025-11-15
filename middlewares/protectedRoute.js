@@ -4,7 +4,10 @@ import jwt from "jsonwebtoken";
 export const protectedRoute = async (req, res, next) => {
   try {
     // Check if the request has a JWT token
-    const token = req.cookies.jwt;
+    let token = req.cookies.jwt;
+    if (!token && req.headers.authorization?.startsWith("Bearer ")) {
+      token = req.headers.authorization.split(" ")[1];
+    }
     if (!token) {
       return res.status(401).json({
         con: false,
