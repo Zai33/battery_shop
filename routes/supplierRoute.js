@@ -7,7 +7,6 @@ import {
   getSupplierById,
   updateSupplier,
 } from "../controllers/supplierController.js";
-
 const router = express.Router();
 
 router.use(protectedRoute);

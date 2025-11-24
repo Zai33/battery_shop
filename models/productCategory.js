@@ -14,7 +14,7 @@ const productCategorySchema = new mongoose.Schema(
         "Other",
       ],
       required: true,
-      unique: true, // optional: prevent duplicate categories
+      unique: true, 
       trim: true,
     },
   },

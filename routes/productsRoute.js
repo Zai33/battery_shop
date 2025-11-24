@@ -4,6 +4,7 @@ import {
   createProduct,
   deleteProduct,
   getAllProducts,
+  getProductById,
   getProductsByCategory,
   updateAllProductFields,
   updatePartialProductFields,
@@ -14,6 +15,7 @@ const router = express.Router();
 router.use(protectedRoute); // Apply the protected route middleware to all routes in this router
 router.get("/", getAllProducts); //get all products
 router.post("/create", createProduct); //create product
+router.get("/:id", getProductById); //get product by id
 router.put("/update/:id", adminOnly, updateAllProductFields); //update product
 router.patch("/update/:id", adminOnly, updatePartialProductFields); //update product partially
 router.delete("/delete/:id", adminOnly, deleteProduct); //delete product
