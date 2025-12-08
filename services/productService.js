@@ -6,6 +6,7 @@ export const getAllProductsService = async (page = 1, limit = 10) => {
     Product.find()
       .populate("category", "type")
       .populate("supplier", "companyName")
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit),
 
