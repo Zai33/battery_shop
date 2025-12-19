@@ -9,7 +9,6 @@ const batteryDetailSchema = new mongoose.Schema(
     },
     condition: {
       type: String,
-      required: true,
       trim: true,
     },
     quantity: {
@@ -27,6 +26,10 @@ const batteryDetailSchema = new mongoose.Schema(
     },
     reused: {
       type: Boolean,
+      required: true,
+    },
+    total: {
+      type: Number,
       required: true,
     },
   },

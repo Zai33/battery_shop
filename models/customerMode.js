@@ -12,10 +12,6 @@ const customerSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    carNumber: {
-      type: String,
-      trim: true,
-    },
   },
   {
     timestamps: true,

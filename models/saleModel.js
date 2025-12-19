@@ -37,11 +37,15 @@ const salesSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 0,
-    },  
+    },
     rebuyOldBattery: {
       type: Boolean,
       required: true,
       default: false,
+    },
+    carNumber: {
+      type: String,
+      trim: true,
     },
     buyback: [
       {
@@ -70,7 +74,7 @@ const salesSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ["Cash", "Card", "Credit"],
+      enum: ["Cash", "Credit", "KBZ pay"],
       required: true,
     },
     paidAmount: {
@@ -78,7 +82,7 @@ const salesSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
-    changeGiven: {
+    duePayment: {
       type: Number,
       required: true,
       min: 0,

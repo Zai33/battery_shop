@@ -63,7 +63,7 @@ export const getProductById = async (req, res) => {
       con: false,
       message: "Failed to fetch product",
       error: error.message,
-    }); 
+    });
   }
 };
 
@@ -109,6 +109,14 @@ export const createProduct = async (req, res) => {
       warrantyMonths,
       quantity,
     };
+
+    const existingProduct = await Product.findOne({ name: name, type: type });
+    if (existingProduct) {
+      return res.status(400).json({
+        con: false,
+        message: "Product with the same name and type already exists",
+      });
+    }
 
     const newProduct = await createProductService(productData);
     res.status(201).json({
@@ -290,6 +298,39 @@ export const getProductsByCategory = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching products by category:", error);
+    res.status(500).json({
+      con: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+//search products
+export const searchProducts = async (req, res) => {
+  try {
+    const query = req.query.key;
+    const words = query
+      .trim()
+      .split(/\s+/)
+      .map((word) => word.toLowerCase());
+
+    const regexPatterns = words.map((word) => new RegExp(`\\b${word}`, "i"));
+
+    const results = await Product.find({
+      $and: regexPatterns.map((pattern) => ({
+        name: { $regex: pattern },
+      })),
+    }).limit(50);
+
+    res.status(200).json({
+      con: true,
+      message: "Search results",
+      count: results.length,
+      result: results,
+    });
+  } catch (error) {
+    console.error("Error Searching products :", error);
     res.status(500).json({
       con: false,
       message: "Server error",

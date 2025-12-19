@@ -6,16 +6,24 @@ import Customer from "../models/customerMode.js";
 import Product from "../models/productModel.js";
 import Buyback from "../models/buyBackModel.js";
 import mongoose from "mongoose";
+import { generateInvoiceNumber } from "../utils/generateInvoiceNumber.js";
+import Sale from "../models/saleModel.js";
 
 // Get all sales
 export const getAllSales = async (req, res) => {
   try {
-    const sales = await getAllSalesService();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const { sales, total } = await getAllSalesService(page, limit);
 
     res.status(200).json({
       con: true,
       message: "Sales retrieved successfully",
-      count: sales.length,
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
       result: sales,
     });
   } catch (error) {
@@ -34,8 +42,8 @@ export const createSale = async (req, res) => {
   session.startTransaction();
   try {
     const {
-      customer,
       customerInfo,
+      carNumber,
       product,
       batteryCategory,
       quantity,
@@ -45,21 +53,22 @@ export const createSale = async (req, res) => {
       rebuyOldBattery,
       paymentMethod,
       paidAmount,
-      changeGiven,
+      duePayment,
       isPaid,
       buybackData,
     } = req.body;
 
     // Basic validation
     if (
-      (!customer && !customerInfo) ||
-      !product ||
-      !batteryCategory ||
-      !quantity ||
-      !salePrice ||
-      !totalPrice ||
-      !paymentMethod ||
-      !paidAmount
+      customerInfo == null ||
+      carNumber == null ||
+      product == null ||
+      batteryCategory == null ||
+      quantity == null ||
+      salePrice == null ||
+      totalPrice == null ||
+      paymentMethod == null ||
+      paidAmount == null
     ) {
       return res.status(400).json({
         con: false,
@@ -67,10 +76,10 @@ export const createSale = async (req, res) => {
       });
     }
 
-    let customerId = customer;
+    let customerId;
 
     // If customer ID is not provided but customer info is, create or find customer
-    if (!customerId && customerInfo) {
+    if (customerInfo) {
       // Try to find customer by phone number
       let existingCustomer = await Customer.findOne({
         phone: customerInfo.phone,
@@ -108,20 +117,13 @@ export const createSale = async (req, res) => {
 
     if (rebuyOldBattery && Array.isArray(buybackData)) {
       for (const item of buybackData) {
-        const {
-          batteryType,
-          condition,
-          quantity: bbQuantity,
-          buyPrice,
-          inspectionNote,
-          reused,
-        } = item;
+        const { batterySize, buyPrice, quantity, total, reused } = item;
 
         if (
-          !batteryType ||
-          !condition ||
-          !bbQuantity ||
+          !batterySize ||
           !buyPrice ||
+          !quantity ||
+          !total ||
           reused === undefined
         ) {
           await session.abortTransaction();
@@ -136,11 +138,10 @@ export const createSale = async (req, res) => {
           customer: customerId,
           batteries: [
             {
-              batterySize: batteryType,
-              condition,
-              quantity: bbQuantity,
+              batterySize,
+              quantity,
               buyPrice,
-              inspectionNote,
+              total,
               reused,
             },
           ],
@@ -162,8 +163,12 @@ export const createSale = async (req, res) => {
       warrantyExpiry.setMonth(warrantyExpiry.getMonth() + 3);
     }
 
+    const invoiceNumber = await generateInvoiceNumber();
+
     const saleData = {
       customer: customerId,
+      carNumber,
+      invoiceNumber,
       product,
       batteryCategory,
       quantity,
@@ -174,7 +179,7 @@ export const createSale = async (req, res) => {
       buyback: buybackIds,
       paymentMethod,
       paidAmount,
-      changeGiven,
+      duePayment,
       isPaid,
       warrantyExpiry,
     };
@@ -223,4 +228,34 @@ export const createSale = async (req, res) => {
       error: error.message,
     });
   }
-};  
+};
+
+// Get sale by ID
+export const getSaleById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const sale = await Sale.findById(id)
+      .populate("customer", "name phone")
+      .populate("product", "name brand")
+      .populate("buyback", "batteries")
+      .populate("createdBy", "name");
+    if (!sale) {
+      return res.status(404).json({
+        con: false,
+        message: "Sale not found",
+      });
+    }
+    res.status(200).json({
+      con: true,
+      message: "Sale retrieved successfully",
+      result: sale,
+    });
+  } catch (error) {
+    console.error("Error retrieving sales by id", error);
+    res.status(500).json({
+      con: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
