@@ -45,7 +45,7 @@ app.use(`${api}/supplier`, supplierRoute); // Use supplier routes
 app.use(`${api}/not-reusable-battery`, notReusableBatteryRoute); // Use not reusable battery routes
 app.use(`${api}/buy-back`, buyBackRouter); // Use buy-back routes
 
-app.listen(port, () => {
+app.listen(port, "0.0.0.0", () => {
   console.log(`Server is running on http://localhost:${port}${api}`);
   connectDb(); // Connect to the database
   createDefaultAdmin(); // Create default admin user

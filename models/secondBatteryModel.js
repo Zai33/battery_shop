@@ -2,22 +2,7 @@ import mongoose from "mongoose";
 
 const secondBatterySchema = new mongoose.Schema(
   {
-    buyback: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Buyback", // if you have a buyback collection
-      required: true,
-    },
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
     type: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    brand: {
       type: String,
       required: true,
       trim: true,
@@ -36,11 +21,6 @@ const secondBatterySchema = new mongoose.Schema(
       type: Number,
       default: 3, // 3-month warranty for second batteries
       min: 0,
-    },
-    condition: {
-      type: String,
-      enum: ["Good", "Fair", "Poor"],
-      required: true,
     },
     quantity: {
       type: Number,

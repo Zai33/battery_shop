@@ -2,11 +2,8 @@ import Sale from "../models/saleModel.js";
 import { generateInvoiceNumber } from "../utils/generateInvoiceNumber.js";
 
 export const createSaleService = async (data, userId, session = null) => {
-  const invoiceNumber = await generateInvoiceNumber();
-
   const newSale = new Sale({
     ...data,
-    invoiceNumber,
     createdBy: userId,
   });
 

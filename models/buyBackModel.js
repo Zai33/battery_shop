@@ -16,6 +16,11 @@ const batteryDetailSchema = new mongoose.Schema(
       required: true,
       min: 1,
     },
+    reusableQty: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
     buyPrice: {
       type: Number,
       required: true,
@@ -23,10 +28,6 @@ const batteryDetailSchema = new mongoose.Schema(
     inspectionNote: {
       type: String,
       trim: true,
-    },
-    reused: {
-      type: Boolean,
-      required: true,
     },
     total: {
       type: Number,
@@ -38,6 +39,12 @@ const batteryDetailSchema = new mongoose.Schema(
 
 const buybackSchema = new mongoose.Schema(
   {
+    buybackNumber: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
     customer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Customer",

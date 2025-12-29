@@ -1,18 +1,34 @@
-import Sale from "../models/saleModel.js";
+import BuybackCounter from "../models/BuybackCounterModel.js";
+import SaleCounter from "../models/SaleCounterModel.js";
 
 export const generateInvoiceNumber = async () => {
   const today = new Date();
-  const yyyyMMdd = today.toISOString().split("T")[0].replace(/-/g, ""); 
+  const yyyyMMdd = today.toISOString().split("T")[0].replace(/-/g, "");
 
-  // Get start and end of today
-  const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-  const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+  const counterId = `INV-${yyyyMMdd}`;
 
-  // Count how many invoices exist today
-  const countToday = await Sale.countDocuments({
-    createdAt: { $gte: startOfDay, $lte: endOfDay },
-  });
+  const counter = await SaleCounter.findByIdAndUpdate(
+    counterId,
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true }
+  );
 
-  const counter = String(countToday + 1).padStart(3, "0"); 
-  return `INV-${yyyyMMdd}-${counter}`;
+  const padded = String(counter.seq).padStart(3, "0");
+  return `INV-${yyyyMMdd}-${padded}`;
+};
+
+export const generateBuybackNumber = async () => {
+  const today = new Date();
+  const yyyyMMdd = today.toISOString().split("T")[0].replace(/-/g, "");
+
+  const counterId = `BB-${yyyyMMdd}`;
+
+  const counter = await BuybackCounter.findByIdAndUpdate(
+    counterId,
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true }
+  );
+
+  const padded = String(counter.seq).padStart(3, "0");
+  return `BB-${yyyyMMdd}-${padded}`;
 };

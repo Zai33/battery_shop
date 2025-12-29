@@ -6,7 +6,10 @@ import Customer from "../models/customerMode.js";
 import Product from "../models/productModel.js";
 import Buyback from "../models/buyBackModel.js";
 import mongoose from "mongoose";
-import { generateInvoiceNumber } from "../utils/generateInvoiceNumber.js";
+import {
+  generateBuybackNumber,
+  generateInvoiceNumber,
+} from "../utils/generateInvoiceNumber.js";
 import Sale from "../models/saleModel.js";
 
 // Get all sales
@@ -97,6 +100,7 @@ export const createSale = async (req, res) => {
 
     // If still no customerId, return error
     if (!customerId) {
+      await session.abortTransaction();
       return res.status(400).json({
         con: false,
         message: "Customer ID or customer info is required",
@@ -113,19 +117,14 @@ export const createSale = async (req, res) => {
     }
 
     // Step 3: Handle Buybacks (if any)
-    const buybackIds = [];
+    let buybackIds = null;
+    const batteries = [];
 
     if (rebuyOldBattery && Array.isArray(buybackData)) {
       for (const item of buybackData) {
-        const { batterySize, buyPrice, quantity, total, reused } = item;
+        const { batterySize, buyPrice, quantity, total } = item;
 
-        if (
-          !batterySize ||
-          !buyPrice ||
-          !quantity ||
-          !total ||
-          reused === undefined
-        ) {
+        if (!batterySize || buyPrice == null || !quantity || !total) {
           await session.abortTransaction();
           session.endSession();
           return res.status(400).json({
@@ -134,23 +133,27 @@ export const createSale = async (req, res) => {
           });
         }
 
-        const newBuyback = new Buyback({
-          customer: customerId,
-          batteries: [
-            {
-              batterySize,
-              quantity,
-              buyPrice,
-              total,
-              reused,
-            },
-          ],
-          createdBy: req.user._id,
+        batteries.push({
+          batterySize,
+          quantity,
+          reusableQty: 0,
+          buyPrice,
+          total,
         });
-
-        const savedBuyback = await newBuyback.save({ session });
-        buybackIds.push(savedBuyback._id);
       }
+    }
+
+    if (batteries.length > 0) {
+      const buybackNumber = await generateBuybackNumber();
+      const newBuyback = new Buyback({
+        buybackNumber,
+        customer: customerId,
+        batteries,
+        createdBy: req.user._id,
+      });
+
+      const savedBuyback = await newBuyback.save({ session });
+      buybackIds = savedBuyback._id;
     }
 
     // Calculate warranty
@@ -194,9 +197,9 @@ export const createSale = async (req, res) => {
     );
 
     //Link sale to buybacks
-    if (buybackIds.length > 0) {
-      await Buyback.updateMany(
-        { _id: { $in: buybackIds } },
+    if (buybackIds) {
+      await Buyback.updateOne(
+        { _id: buybackIds },
         { $set: { sale: savedSale._id } },
         { session }
       );
@@ -255,6 +258,31 @@ export const getSaleById = async (req, res) => {
     res.status(500).json({
       con: false,
       message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+//delete sale by id
+export const deleteSaleById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const sale = await Sale.findByIdAndDelete(id);
+    if (!sale) {
+      return res.status(404).json({
+        con: false,
+        message: "Sale not found",
+      });
+    }
+    return res.status(200).json({
+      con: true,
+      message: "Sale delete Successfully",
+    });
+  } catch (error) {
+    console.log("Error deleting sale: ", error);
+    res.status(500).json({
+      con: false,
+      message: "Failed to delete product",
       error: error.message,
     });
   }
