@@ -37,6 +37,13 @@ const batteryDetailSchema = new mongoose.Schema(
   { _id: false } // Avoid unnecessary ObjectId for subdocuments
 );
 
+batteryDetailSchema.pre("validate", function (next) {
+  if (this.reusableQty > this.quantity) {
+    return next(new Error("reusableQty cannot exceed quantity"));
+  }
+  next();
+});
+
 const buybackSchema = new mongoose.Schema(
   {
     buybackNumber: {

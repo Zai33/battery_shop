@@ -5,6 +5,7 @@ import {
   deleteBuyBackById,
   getAllBuyBacks,
   getBuyBackById,
+  updateBuyBack,
   verifyBuyBack,
 } from "../controllers/buyBackController.js";
 
@@ -15,6 +16,7 @@ router.get("/", protectedRoute, getAllBuyBacks); // Get all buy-backs
 router.get("/:id", protectedRoute, getBuyBackById); // Get buy-back by ID
 router.post("/create", protectedRoute, createBuyBack); //create buyback
 router.delete("/delete/:id", protectedRoute, adminOnly, deleteBuyBackById); //delete buy-back by ID
+router.patch("/update/:id", protectedRoute, updateBuyBack); //update buy-back by ID
 router.get("/verify/:id", verifyBuyBack); //verify buyback
 
 export default router;

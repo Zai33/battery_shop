@@ -7,8 +7,8 @@ const notReusableBatterySchema = new mongoose.Schema(
       enum: [
         "cycle battery",
         "N15",
-        "N35",
         "N20",
+        "N35",
         "N45",
         "N50",
         "N70",

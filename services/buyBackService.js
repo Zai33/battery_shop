@@ -51,9 +51,9 @@ export const createStandaloneBuyBack = async (payload, userId) => {
     const batteries = buybackData.map((item) => ({
       batterySize: item.batterySize,
       quantity: item.quantity,
+      reusableQty: 0,
       buyPrice: item.buyPrice,
       total: item.quantity * item.buyPrice,
-      reused: item.reused ?? false,
     }));
 
     const buyback = new Buyback({
@@ -78,18 +78,21 @@ export const createStandaloneBuyBack = async (payload, userId) => {
 
 export const rollbackInventory = async (buyback, session) => {
   for (const item of buyback.batteries) {
-    if (item.reused) {
-      // rollback second battery
+    const reusableQty = item.reusableQty || 0;
+    const notReusableQty = item.quantity - reusableQty;
+
+    if (reusableQty > 0) {
       await SecondBattery.updateOne(
         { capacity: item.batterySize },
-        { $inc: { quantity: -item.quantity } },
+        { $inc: { quantity: -reusableQty } },
         { session }
       );
-    } else {
-      // rollback not reusable
+    }
+
+    if (notReusableQty > 0) {
       await NotReusableBattery.updateOne(
         { size: item.batterySize },
-        { $inc: { quantity: -item.quantity } },
+        { $inc: { quantity: -notReusableQty } },
         { session }
       );
     }
@@ -98,16 +101,21 @@ export const rollbackInventory = async (buyback, session) => {
 
 export const applyInventory = async (batteries, session) => {
   for (const item of batteries) {
-    if (item.reused) {
+    const reusableQty = item.reusableQty || 0;
+    const notReusableQty = item.quantity - reusableQty;
+
+    if (reusableQty > 0) {
       await SecondBattery.findOneAndUpdate(
         { capacity: item.batterySize },
-        { $inc: { quantity: item.quantity } },
+        { $inc: { quantity: reusableQty } },
         { upsert: true, new: true, session }
       );
-    } else {
+    }
+
+    if (notReusableQty > 0) {
       await NotReusableBattery.findOneAndUpdate(
         { size: item.batterySize },
-        { $inc: { quantity: item.quantity } },
+        { $inc: { quantity: notReusableQty } },
         { upsert: true, new: true, session }
       );
     }

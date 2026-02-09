@@ -130,6 +130,7 @@ export const createBuyBack = async (req, res) => {
       result: buyback,
     });
   } catch (error) {
+    console.log("error ", error);
     if (error.message === "INVALID_INPUT") {
       return res.status(400).json({
         con: false,
@@ -185,6 +186,8 @@ export const updateBuyBack = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
+    console.log("data ", updates);
+
     const buyback = await Buyback.findById(id).session(session);
     if (!buyback) {
       throw new Error("BUYBACK_NOT_FOUND");
@@ -192,7 +195,7 @@ export const updateBuyBack = async (req, res) => {
 
     await rollbackInventory(buyback, session);
 
-    buyback.batteries = updates.batteries ?? buyback.batteries;
+    buyback.batteries = updates;
     buyback.createdBy = req.user._id;
 
     await buyback.save({ session });

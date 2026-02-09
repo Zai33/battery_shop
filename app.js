@@ -14,6 +14,7 @@ import productCategoryRoute from "./routes/productCategoryRoute.js";
 import supplierRoute from "./routes/supplierRoute.js";
 import notReusableBatteryRoute from "./routes/notReusableBatteryRoute.js";
 import buyBackRouter from "./routes/buyBackRoute.js";
+import secondBatteryRouter from "./routes/secondBatteryRoute.js";
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ app.use(`${api}/category`, productCategoryRoute); //User category routes
 app.use(`${api}/supplier`, supplierRoute); // Use supplier routes
 app.use(`${api}/not-reusable-battery`, notReusableBatteryRoute); // Use not reusable battery routes
 app.use(`${api}/buy-back`, buyBackRouter); // Use buy-back routes
+app.use(`${api}/second-battery`, secondBatteryRouter); // use second battery routes
 
 app.listen(port, "0.0.0.0", () => {
   console.log(`Server is running on http://localhost:${port}${api}`);
