@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema(
     phone_number: {
       type: String,
     },
+    image: {
+      type: String,
+      default: null,
+    },
     otp: {
       type: String,
       default: null,
@@ -36,7 +40,7 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const User = mongoose.model("User", userSchema);

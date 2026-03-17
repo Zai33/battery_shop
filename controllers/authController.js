@@ -230,6 +230,7 @@ export const loginUser = async (req, res) => {
         message: "Please fill all required fields",
       });
     }
+
     // Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
@@ -269,7 +270,7 @@ export const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error logging in user:", error);
+    console.log("Error logging in user:", error);
     res.status(500).json({
       con: false,
       message: "Internal server error",
@@ -301,7 +302,7 @@ export const getUserProfile = async (req, res) => {
   try {
     // Find the user by userId
     const user = await User.findById(req.user._id).select(
-      "-password -otp -otpExpire"
+      "-password -otp -otpExpire",
     );
     res.status(200).json({
       con: true,
