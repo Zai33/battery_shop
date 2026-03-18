@@ -1,8 +1,12 @@
 import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
 import { generateToken } from "../utils/generateToken.js";
 import { generateOpt, sendOptEmail } from "../utils/otpService.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const registerUser = async (req, res) => {
   try {
@@ -256,17 +260,30 @@ export const loginUser = async (req, res) => {
       });
     }
     // Generate token
-    const token = generateToken(user._id, res);
+    const { accessToken, refreshToken } = await generateToken(user);
+
+    // Save the refresh token in the database
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    res.cookie("refreshToken", refreshToken, {
+      maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // Set to true in production
+      sameSite: "strict", // CSRF protection
+    });
+
     res.status(200).json({
       con: true,
       message: "Login successful",
+      accessToken,
       result: {
         _id: user._id,
         name: user.name,
         email: user.email,
         phone_number: user.phone_number,
         role: user.role,
-        token: token,
+        // token: token,
       },
     });
   } catch (error) {
@@ -282,13 +299,71 @@ export const loginUser = async (req, res) => {
 // logout user
 export const logout = async (req, res) => {
   try {
-    res.cookie("jwt", "", { maxAge: 0 });
+    const refreshToken = req.cookies.refreshToken;
+    if (refreshToken) {
+      const user = await User.findOne({ refreshToken });
+      if (user) {
+        user.refreshToken = null;
+        await user.save();
+      }
+    }
+    res.clearCookie("refreshToken");
     res.status(200).json({
       con: true,
       message: "Logout successful",
     });
   } catch (error) {
     console.error("Error logging out user:", error);
+    res.status(500).json({
+      con: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+//refresh token
+export const refreshAccessToken = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({
+        con: false,
+        message: "No refresh token provided",
+      });
+    }
+
+    //find use with refresh token
+    const user = await User.findOne({ refreshToken });
+    if (!user) {
+      return res.status(403).json({
+        con: false,
+        message: "Invalid refresh token",
+      });
+    }
+
+    //verify refresh token
+    jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, decoded) => {
+      if (err || decoded.userId !== user._id.toString()) {
+        return res.status(403).json({
+          con: false,
+          message: "Invalid refresh token",
+        });
+      }
+    });
+
+    //generate new access token
+    const accessToken = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_ACCESS_SECRET,
+      { expiresIn: "15m" },
+    );
+    res.status(200).json({
+      con: true,
+      accessToken,
+    });
+  } catch (error) {
+    console.error("Error generating refresh access token:", error);
     res.status(500).json({
       con: false,
       message: "Internal server error",

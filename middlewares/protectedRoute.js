@@ -1,21 +1,18 @@
-import User from "../models/userModel.js";
 import jwt from "jsonwebtoken";
 
 export const protectedRoute = async (req, res, next) => {
   try {
-    // Check if the request has a JWT token
-    let token = req.cookies.jwt;
-    if (!token && req.headers.authorization?.startsWith("Bearer ")) {
-      token = req.headers.authorization.split(" ")[1];
-    }
+    //check access token in header
+    const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
       return res.status(401).json({
         con: false,
-        message: "Unauthorized access, token not found",
+        message: "Unauthorized access, token missing",
       });
     }
+
     // Verify the token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
     if (!decoded) {
       return res.status(401).json({
         con: false,
@@ -23,16 +20,21 @@ export const protectedRoute = async (req, res, next) => {
       });
     }
 
-    // Find the user associated with the token
-    const user = await User.findById(decoded.userId).select("-password");
-    if (!user) {
-      return res.status(401).json({
-        con: false,
-        message: "Unauthorized access, user not found",
-      });
-    }
+    req.user = {
+      id: decoded.userId,
+      role: decoded.role,
+    };
 
-    req.user = user; // Attach the user to the request object
+    // Find the user associated with the token
+    // const user = await User.findById(decoded.userId).select("-password");
+    // if (!user) {
+    //   return res.status(401).json({
+    //     con: false,
+    //     message: "Unauthorized access, user not found",
+    //   });
+    // }
+
+    // req.user = user; // Attach the user to the request object
     next(); // Proceed to the next middleware or route handler
   } catch (error) {
     console.error("Error in protected route:", error);
@@ -42,6 +44,18 @@ export const protectedRoute = async (req, res, next) => {
       error: error.message,
     });
   }
+};
+
+export const roleBasedAccess = (...allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user || !allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({
+        con: false,
+        message: "Forbidden, you don't have permission to access this resource",
+      });
+    }
+    next(); // Proceed to the next middleware or route handler
+  };
 };
 
 // Function to check if the user is an admin

@@ -4,6 +4,7 @@ import {
   getUserProfile,
   loginUser,
   logout,
+  refreshAccessToken,
   registerUser,
   resendOpt,
   verifyUser,
@@ -17,6 +18,7 @@ router.post("/register/verify-otp", verifyUser);
 router.post("/register/resend-otp", resendOpt);
 router.post("/login", loginUser);
 router.post("/logout", logout);
+router.post("/refresh-token", refreshAccessToken);
 router.get("/get-me", protectedRoute, getUserProfile);
 router.get("/check", checkAuth);
 
