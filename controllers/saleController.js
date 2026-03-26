@@ -14,7 +14,7 @@ import Sale from "../models/saleModel.js";
 import logger from "../utils/logger.js";
 
 // Get all sales
-export const getAllSales = async (req, res) => {
+export const getAllSales = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -31,17 +31,12 @@ export const getAllSales = async (req, res) => {
       result: sales,
     });
   } catch (error) {
-    console.error("Error retrieving sales:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 // Create a new sale
-export const createSale = async (req, res) => {
+export const createSale = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
@@ -226,16 +221,12 @@ export const createSale = async (req, res) => {
         error: error.message,
       });
     }
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 // Get sale by ID
-export const getSaleById = async (req, res) => {
+export const getSaleById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const sale = await Sale.findById(id)
@@ -255,17 +246,12 @@ export const getSaleById = async (req, res) => {
       result: sale,
     });
   } catch (error) {
-    console.error("Error retrieving sales by id", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 //delete sale by id
-export const deleteSaleById = async (req, res) => {
+export const deleteSaleById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const sale = await Sale.findByIdAndDelete(id);
@@ -280,11 +266,6 @@ export const deleteSaleById = async (req, res) => {
       message: "Sale delete Successfully",
     });
   } catch (error) {
-    console.log("Error deleting sale: ", error);
-    res.status(500).json({
-      con: false,
-      message: "Failed to delete product",
-      error: error.message,
-    });
+    return next(error);
   }
 };

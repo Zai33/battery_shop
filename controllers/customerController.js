@@ -6,7 +6,7 @@ import {
 } from "../services/customerService.js";
 
 //get all customers
-export const getAllCustomers = async (req, res) => {
+export const getAllCustomers = async (req, res, next) => {
   try {
     const customers = await getAllCustomersService();
     res.status(200).json({
@@ -15,17 +15,12 @@ export const getAllCustomers = async (req, res) => {
       result: customers,
     });
   } catch (error) {
-    console.error("Error fetching customers:", error);
-    res.status(500).json({
-      con: false,
-      message: "Error fetching customers",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 //create a new customer
-export const getCustomerById = async (req, res) => {
+export const getCustomerById = async (req, res, next) => {
   const { id } = req.params;
   try {
     const customer = await getCustomerByIdService(id);
@@ -40,17 +35,12 @@ export const getCustomerById = async (req, res) => {
       result: customer,
     });
   } catch (error) {
-    console.log("Error fetching customer:", error);
-    res.status(500).json({
-      con: false,
-      message: "Error fetching customer",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 //create a new customer
-export const createCustomer = async (req, res) => {
+export const createCustomer = async (req, res, next) => {
   const { name, phone, carNumber } = req.body;
   try {
     // Basic validation
@@ -71,17 +61,12 @@ export const createCustomer = async (req, res) => {
       result: newCustomer,
     });
   } catch (error) {
-    console.error("Error creating customer:", error);
-    res.status(500).json({
-      con: false,
-      message: "Error creating customer",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 // delete a customer
-export const deleteCustomer = async (req, res) => {
+export const deleteCustomer = async (req, res, next) => {
   const { id } = req.params;
   try {
     const customer = await getCustomerByIdService(id);
@@ -97,11 +82,6 @@ export const deleteCustomer = async (req, res) => {
       message: "Customer deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting customer:", error);
-    res.status(500).json({
-      con: false,
-      message: "Error deleting customer",
-      error: error.message,
-    });
+    return next(error);
   }
 };

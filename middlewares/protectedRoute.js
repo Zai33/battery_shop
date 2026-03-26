@@ -7,6 +7,7 @@ export const protectedRoute = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({
         con: false,
+        code: "UNAUTHORIZED",
         message: "Unauthorized access, token missing",
       });
     }
@@ -16,6 +17,7 @@ export const protectedRoute = async (req, res, next) => {
     if (!decoded) {
       return res.status(401).json({
         con: false,
+        code: "UNAUTHORIZED",
         message: "Unauthorized access, invalid token",
       });
     }
@@ -37,12 +39,7 @@ export const protectedRoute = async (req, res, next) => {
     // req.user = user; // Attach the user to the request object
     next(); // Proceed to the next middleware or route handler
   } catch (error) {
-    console.error("Error in protected route:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
@@ -51,6 +48,7 @@ export const roleBasedAccess = (...allowedRoles) => {
     if (!req.user || !allowedRoles.includes(req.user.role)) {
       return res.status(403).json({
         con: false,
+        code: "FORBIDDEN",
         message: "Forbidden, you don't have permission to access this resource",
       });
     }
@@ -65,16 +63,12 @@ export const adminOnly = (req, res, next) => {
     if (req.user.role !== "admin") {
       return res.status(403).json({
         con: false,
+        code: "FORBIDDEN",
         message: "Forbidden, admin access only",
       });
     }
     next(); // Proceed to the next middleware or route handler
   } catch (error) {
-    console.error("Error in admin only route:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };

@@ -1,7 +1,7 @@
 import ProductCategory from "../models/productCategory.js";
 import { getAllProductCategoriesService } from "../services/productCategoryService.js";
 
-export const getAllCategories = async (req, res) => {
+export const getAllCategories = async (req, res, next) => {
   try {
     const categories = await getAllProductCategoriesService();
     res.status(200).json({
@@ -10,16 +10,11 @@ export const getAllCategories = async (req, res) => {
       result: categories,
     });
   } catch (error) {
-    console.log("Error in getAllCategories:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
-export const createProductCategory = async (req, res) => {
+export const createProductCategory = async (req, res, next) => {
   try {
     const { type } = req.body;
     if (!type) {
@@ -45,22 +40,17 @@ export const createProductCategory = async (req, res) => {
       result: newCategory,
     });
   } catch (error) {
-    console.log("Error in createProductCategory:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
-export const deleteProductCategory = async (req, res) => {
+export const deleteProductCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
 
     const deletedCategory = await ProductCategory.findByIdAndDelete(id);
     if (!deletedCategory) {
-      return res.statu(404).json({
+      return res.status(404).json({
         con: false,
         message: "Category not found",
       });
@@ -70,11 +60,6 @@ export const deleteProductCategory = async (req, res) => {
       message: "Category deleted successfully",
     });
   } catch (error) {
-    console.log("Error in deleteProductCategory:", error);
-    res.statu(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };

@@ -1,20 +1,38 @@
 import winston from "winston";
 
-const { combine, timestamp, printf, colorize, errors } = winston.format;
+const { combine, timestamp, printf, colorize, errors, json } = winston.format;
 
-const logFormat = printf(({ level, message, timestamp, stack }) => {
-  return `${timestamp} [${level}]: ${stack || message}`;
-});
+// Human-friendly logs for console, JSON logs for files.
+const consoleFormat = combine(
+  colorize(),
+  timestamp(),
+  errors({ stack: true }),
+  printf(({ level, message, timestamp, stack }) => {
+    return stack ? `${timestamp} [${level}]: ${stack}` : `${timestamp} [${level}]: ${message}`;
+  })
+);
+
+const fileFormat = combine(
+  timestamp(),
+  errors({ stack: true }),
+  json()
+);
 
 const logger = winston.createLogger({
-  level: "info",
-  format: combine(timestamp(), errors({ stack: true }), logFormat),
+  level: process.env.LOG_LEVEL || "info",
   transports: [
     new winston.transports.Console({
-      format: combine(colorize(), logFormat),
+      format: consoleFormat,
     }),
-    new winston.transports.File({ filename: "logs/error.log", level: "error" }),
-    new winston.transports.File({ filename: "logs/combined.log" }),
+    new winston.transports.File({
+      filename: "logs/error.log",
+      level: "error",
+      format: fileFormat,
+    }),
+    new winston.transports.File({
+      filename: "logs/combined.log",
+      format: fileFormat,
+    }),
   ],
 });
 

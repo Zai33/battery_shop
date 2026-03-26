@@ -9,7 +9,7 @@ import {
 import Sale from "../models/saleModel.js";
 
 //get all buybacks
-export const getAllBuyBacks = async (req, res) => {
+export const getAllBuyBacks = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -35,17 +35,12 @@ export const getAllBuyBacks = async (req, res) => {
       result: buybacks,
     });
   } catch (error) {
-    console.log("Error fetching buybacks:", error);
-    res.status(500).json({
-      con: false,
-      message: "Failed to fetch buybacks",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 //get buyback by id
-export const getBuyBackById = async (req, res) => {
+export const getBuyBackById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const buyback = await Buyback.findById(id)
@@ -64,17 +59,12 @@ export const getBuyBackById = async (req, res) => {
       result: buyback,
     });
   } catch (error) {
-    console.log("Error fetching buyback: ", error);
-    res.status(500).json({
-      con: false,
-      message: "Failed to fetch buyback",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 //delete buyback by id
-export const deleteBuyBackById = async (req, res) => {
+export const deleteBuyBackById = async (req, res, next) => {
   const session = await mongoose.startSession();
   try {
     const { id } = req.params;
@@ -111,16 +101,12 @@ export const deleteBuyBackById = async (req, res) => {
     session.endSession();
 
     console.log("Error Deleting BuyBack: ", error);
-    res.status(500).json({
-      con: false,
-      message: "Failed to Delete BuyBack",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 //create stand-alone buyback
-export const createBuyBack = async (req, res) => {
+export const createBuyBack = async (req, res, next) => {
   try {
     const buyback = await createStandaloneBuyBack(req.body, req.user._id);
 
@@ -138,15 +124,12 @@ export const createBuyBack = async (req, res) => {
       });
     }
 
-    return res.status(500).json({
-      con: false,
-      message: "Internal server error",
-    });
+    return next(error);
   }
 };
 
 //verify buyback
-export const verifyBuyBack = async (req, res) => {
+export const verifyBuyBack = async (req, res, next) => {
   try {
     const { id } = req.params;
     const buyback = await Buyback.findById(id)
@@ -171,15 +154,12 @@ export const verifyBuyBack = async (req, res) => {
     });
   } catch (error) {
     console.log("Verification failed :", error);
-    res.status(500).json({
-      valid: false,
-      message: "Verification failed",
-    });
+    return next(error);
   }
 };
 
 //update buyback
-export const updateBuyBack = async (req, res) => {
+export const updateBuyBack = async (req, res, next) => {
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
@@ -209,11 +189,7 @@ export const updateBuyBack = async (req, res) => {
     });
   } catch (error) {
     await session.abortTransaction();
-    res.status(500).json({
-      con: false,
-      message: "Failed to update buyback",
-      error: error.message,
-    });
+    return next(error);
   } finally {
     session.endSession();
   }

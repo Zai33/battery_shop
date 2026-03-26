@@ -1,7 +1,7 @@
 import e from "express";
 import NotReusableBattery from "../models/notReusableBatteryModel.js";
 
-export const getSizeCountsWithTotal = async (req, res) => {
+export const getSizeCountsWithTotal = async (req, res, next) => {
   try {
     const allSizes = [
       "cycle battery",
@@ -45,16 +45,11 @@ export const getSizeCountsWithTotal = async (req, res) => {
       totalQuantity: totalQuantity,
     });
   } catch (error) {
-    console.log("Error fetching size counts:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
-export const createOrUpdateBatterySize = async (req, res) => {
+export const createOrUpdateBatterySize = async (req, res, next) => {
   try {
     const { size, quantity } = req.body;
 
@@ -85,16 +80,11 @@ export const createOrUpdateBatterySize = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log("Error creating or updating battery size:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
-export const deleteAllBatterySizes = async (req, res) => {
+export const deleteAllBatterySizes = async (req, res, next) => {
   try {
     await NotReusableBattery.deleteMany({}); // Delete all battery sizes
     res.status(200).json({
@@ -102,11 +92,6 @@ export const deleteAllBatterySizes = async (req, res) => {
       message: "All battery sizes deleted successfully",
     });
   } catch (error) {
-    console.log("Error deleting all battery sizes:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };

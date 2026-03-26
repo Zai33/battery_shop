@@ -8,7 +8,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export const registerUser = async (req, res) => {
+export const registerUser = async (req, res, next) => {
   try {
     const { name, email, password, confirmPassword } = req.body;
 
@@ -91,16 +91,11 @@ export const registerUser = async (req, res) => {
       userId: newUser._id,
     });
   } catch (error) {
-    console.error("Error registering user:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
-export const verifyUser = async (req, res) => {
+export const verifyUser = async (req, res, next) => {
   try {
     const { userId, otp } = req.body;
     if (!userId || !otp) {
@@ -166,17 +161,12 @@ export const verifyUser = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error verifying user:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 // resend otp
-export const resendOpt = async (req, res) => {
+export const resendOpt = async (req, res, next) => {
   try {
     const { userId } = req.body;
     if (!userId) {
@@ -214,16 +204,11 @@ export const resendOpt = async (req, res) => {
       message: "An OTP has been sent to your e-mail and is valid for 1 minute.",
     });
   } catch (error) {
-    console.error("Error resending OTP:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
-export const loginUser = async (req, res) => {
+export const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     // login user
@@ -287,17 +272,12 @@ export const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log("Error logging in user:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 // logout user
-export const logout = async (req, res) => {
+export const logout = async (req, res, next) => {
   try {
     const refreshToken = req.cookies.refreshToken;
     if (refreshToken) {
@@ -313,17 +293,12 @@ export const logout = async (req, res) => {
       message: "Logout successful",
     });
   } catch (error) {
-    console.error("Error logging out user:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 //refresh token
-export const refreshAccessToken = async (req, res) => {
+export const refreshAccessToken = async (req, res, next) => {
   try {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
@@ -363,17 +338,12 @@ export const refreshAccessToken = async (req, res) => {
       accessToken,
     });
   } catch (error) {
-    console.error("Error generating refresh access token:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 // get user profile
-export const getUserProfile = async (req, res) => {
+export const getUserProfile = async (req, res, next) => {
   try {
     // Find the user by userId
     const user = await User.findById(req.user._id).select(
@@ -390,12 +360,7 @@ export const getUserProfile = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error getting user profile:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
