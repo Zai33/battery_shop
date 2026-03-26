@@ -6,6 +6,11 @@ import upload from "../middlewares/upload.js";
 const router = express.Router();
 
 router.patch("/edit-profile/:id", protectedRoute, editUser);
-router.patch("/edit-profile-image/:id",protectedRoute,upload.single("image"),updateUserImage);
+router.patch(
+  "/edit-profile-image/:id",
+  protectedRoute,
+  upload.single("image"),
+  updateUserImage,
+);
 
 export default router;

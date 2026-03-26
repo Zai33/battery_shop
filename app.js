@@ -16,6 +16,7 @@ import notReusableBatteryRoute from "./routes/notReusableBatteryRoute.js";
 import buyBackRouter from "./routes/buyBackRoute.js";
 import secondBatteryRouter from "./routes/secondBatteryRoute.js";
 import userRoute from "./routes/userRoute.js";
+import morganMiddleware from "./utils/morganLogger.js";
 
 dotenv.config();
 
@@ -36,7 +37,8 @@ app.use(
   }),
 ); // Enable CORS
 app.use(cookieParser()); // Parse cookies
-app.use(morgan("dev")); // Log HTTP requests
+// app.use(morgan("dev")); // Log HTTP requests
+app.use(morganMiddleware); // Use custom morgan middleware for logging
 
 app.use(`${api}/auth`, authroute); // Use auth routes
 app.use(`${api}/sale`, saleRoute); // Use sale routes
@@ -48,6 +50,7 @@ app.use(`${api}/not-reusable-battery`, notReusableBatteryRoute); // Use not reus
 app.use(`${api}/buy-back`, buyBackRouter); // Use buy-back routes
 app.use(`${api}/second-battery`, secondBatteryRouter); // use second battery routes
 app.use(`${api}/user`, userRoute); // use user routes
+
 app.use("/uploads", express.static("uploads")); // Serve static files from the uploads directory
 
 app.listen(port, "0.0.0.0", () => {

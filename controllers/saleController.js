@@ -11,6 +11,7 @@ import {
   generateInvoiceNumber,
 } from "../utils/generateInvoiceNumber.js";
 import Sale from "../models/saleModel.js";
+import logger from "../utils/logger.js";
 
 // Get all sales
 export const getAllSales = async (req, res) => {
@@ -193,7 +194,7 @@ export const createSale = async (req, res) => {
     await Product.findByIdAndUpdate(
       product,
       { $inc: { quantity: -quantity } },
-      { session }
+      { session },
     );
 
     //Link sale to buybacks
@@ -201,7 +202,7 @@ export const createSale = async (req, res) => {
       await Buyback.updateOne(
         { _id: buybackIds },
         { $set: { sale: savedSale._id } },
-        { session }
+        { session },
       );
     }
 

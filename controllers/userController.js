@@ -41,6 +41,7 @@ export const editUser = async (req, res) => {
   }
 };
 
+//local upload
 export const updateUserImage = async (req, res) => {
   try {
     const { id } = req.params;
@@ -79,3 +80,4 @@ export const updateUserImage = async (req, res) => {
     });
   }
 };
+
