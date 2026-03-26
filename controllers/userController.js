@@ -1,6 +1,6 @@
 import User from "../models/userModel.js";
 
-export const editUser = async (req, res) => {
+export const editUser = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name, email, phone_number } = req.body;
@@ -32,17 +32,12 @@ export const editUser = async (req, res) => {
       result: updateUser,
     });
   } catch (error) {
-    console.error("Error updating user:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 //local upload
-export const updateUserImage = async (req, res) => {
+export const updateUserImage = async (req, res, next) => {
   try {
     const { id } = req.params;
     if (!req.file) {
@@ -72,12 +67,7 @@ export const updateUserImage = async (req, res) => {
       result: user,
     });
   } catch (error) {
-    console.error("Error updating user image:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 

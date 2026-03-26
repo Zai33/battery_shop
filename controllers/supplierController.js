@@ -1,6 +1,6 @@
 import Supplier from "../models/supplierModel.js";
 
-export const getAllSupplier = async (req, res) => {
+export const getAllSupplier = async (req, res, next) => {
   try {
     const suppliers = await Supplier.find();
     if (!suppliers) {
@@ -16,16 +16,11 @@ export const getAllSupplier = async (req, res) => {
       result: suppliers,
     });
   } catch (error) {
-    console.log("Error in getAllSupplier:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
-export const createSupplier = async (req, res) => {
+export const createSupplier = async (req, res, next) => {
   try {
     const { companyName, contact, address, phone } = req.body;
     if (!companyName || !contact || !address || !phone) {
@@ -47,16 +42,11 @@ export const createSupplier = async (req, res) => {
       result: savedSupplier,
     });
   } catch (error) {
-    console.log("Error in creatSupplier:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
-export const updateSupplier = async (req, res) => {
+export const updateSupplier = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { companyName, contact, address, phone } = req.body;
@@ -87,16 +77,11 @@ export const updateSupplier = async (req, res) => {
       result: updatedSupplier,
     });
   } catch (error) {
-    console.log("Error in updateSupplier:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
-export const deleteSupplier = async (req, res) => {
+export const deleteSupplier = async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -115,16 +100,11 @@ export const deleteSupplier = async (req, res) => {
       result: deletedSupplier,
     });
   } catch (error) {
-    console.log("Error in deleteSupplier:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
-export const getSupplierById = async (req, res) => {
+export const getSupplierById = async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -143,11 +123,6 @@ export const getSupplierById = async (req, res) => {
       result: supplier,
     });
   } catch (error) {
-    console.log("Error in getSupplierById:", error);
-    res.status(500).json({
-      con: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };

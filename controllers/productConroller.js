@@ -6,7 +6,7 @@ import {
 } from "../services/productService.js";
 
 //get all products
-export const getAllProducts = async (req, res) => {
+export const getAllProducts = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -32,17 +32,12 @@ export const getAllProducts = async (req, res) => {
       result: products,
     });
   } catch (error) {
-    console.log("Error fetching products:", error);
-    res.status(500).json({
-      con: false,
-      message: "Failed to fetch products",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 //get product by id
-export const getProductById = async (req, res) => {
+export const getProductById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const product = await Product.findById(id);
@@ -58,16 +53,11 @@ export const getProductById = async (req, res) => {
       result: product,
     });
   } catch (error) {
-    console.log("Error fetching product: ", error);
-    res.status(500).json({
-      con: false,
-      message: "Failed to fetch product",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
-export const createProduct = async (req, res) => {
+export const createProduct = async (req, res, next) => {
   try {
     const {
       name,
@@ -125,16 +115,11 @@ export const createProduct = async (req, res) => {
       result: newProduct,
     });
   } catch (error) {
-    console.log("Error creating product:", error);
-    res.status(500).json({
-      con: false,
-      message: "Failed to create product",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
-export const updateAllProductFields = async (req, res) => {
+export const updateAllProductFields = async (req, res, next) => {
   try {
     const { id } = req.params;
     const {
@@ -196,16 +181,11 @@ export const updateAllProductFields = async (req, res) => {
       result: updatedProduct,
     });
   } catch (error) {
-    console.log("Error updating product:", error);
-    res.status(500).json({
-      con: false,
-      message: "Failed to update product",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
-export const updatePartialProductFields = async (req, res) => {
+export const updatePartialProductFields = async (req, res, next) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -214,7 +194,6 @@ export const updatePartialProductFields = async (req, res) => {
       return res.status(400).json({
         con: false,
         message: "At least one field is required for update",
-        s,
       });
     }
 
@@ -236,17 +215,12 @@ export const updatePartialProductFields = async (req, res) => {
       result: updatedProduct,
     });
   } catch (error) {
-    console.log("Error updating product:", error);
-    res.status(500).json({
-      con: false,
-      message: "Failed to update product",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 //delete product
-export const deleteProduct = async (req, res) => {
+export const deleteProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
     const product = await Product.findByIdAndDelete(id);
@@ -261,17 +235,12 @@ export const deleteProduct = async (req, res) => {
       message: "Product deleted successfully",
     });
   } catch (error) {
-    console.log("Error deleting product:", error);
-    res.status(500).json({
-      con: false,
-      message: "Failed to delete product",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 //get products by category
-export const getProductsByCategory = async (req, res) => {
+export const getProductsByCategory = async (req, res, next) => {
   try {
     const { categoryId } = req.params;
     const page = parseInt(req.query.page) || 1;
@@ -297,17 +266,12 @@ export const getProductsByCategory = async (req, res) => {
       result: products,
     });
   } catch (error) {
-    console.error("Error fetching products by category:", error);
-    res.status(500).json({
-      con: false,
-      message: "Server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };
 
 //search products
-export const searchProducts = async (req, res) => {
+export const searchProducts = async (req, res, next) => {
   try {
     const query = req.query.key;
     const words = query
@@ -330,11 +294,6 @@ export const searchProducts = async (req, res) => {
       result: results,
     });
   } catch (error) {
-    console.error("Error Searching products :", error);
-    res.status(500).json({
-      con: false,
-      message: "Server error",
-      error: error.message,
-    });
+    return next(error);
   }
 };

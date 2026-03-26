@@ -17,6 +17,7 @@ import buyBackRouter from "./routes/buyBackRoute.js";
 import secondBatteryRouter from "./routes/secondBatteryRoute.js";
 import userRoute from "./routes/userRoute.js";
 import morganMiddleware from "./utils/morganLogger.js";
+import errorHandler from "./middlewares/errorHandler.js";
 
 dotenv.config();
 
@@ -52,6 +53,9 @@ app.use(`${api}/second-battery`, secondBatteryRouter); // use second battery rou
 app.use(`${api}/user`, userRoute); // use user routes
 
 app.use("/uploads", express.static("uploads")); // Serve static files from the uploads directory
+
+// Global error handler (must be registered after routes/middlewares)
+app.use(errorHandler);
 
 app.listen(port, "0.0.0.0", () => {
   console.log(`Server is running on http://localhost:${port}${api}`);
