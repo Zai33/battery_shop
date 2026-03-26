@@ -1,5 +1,8 @@
 import express from "express";
-import { adminOnly, protectedRoute } from "../middlewares/protectedRoute.js";
+import {
+  protectedRoute,
+  roleBasedAccess,
+} from "../middlewares/protectedRoute.js";
 import {
   createOrUpdateBatterySize,
   deleteAllBatterySizes,
@@ -11,6 +14,6 @@ const router = express.Router();
 router.use(protectedRoute);
 router.get("/size-counts", getSizeCountsWithTotal);
 router.post("/create-or-update", createOrUpdateBatterySize);
-router.delete("/deleteAll", adminOnly, deleteAllBatterySizes);
+router.delete("/deleteAll", roleBasedAccess(["admin"]), deleteAllBatterySizes);
 
 export default router;

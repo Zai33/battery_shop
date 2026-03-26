@@ -1,5 +1,8 @@
 import express from "express";
-import { adminOnly, protectedRoute } from "../middlewares/protectedRoute.js";
+import {
+  protectedRoute,
+  roleBasedAccess,
+} from "../middlewares/protectedRoute.js";
 import {
   createProductCategory,
   deleteProductCategory,
@@ -10,7 +13,7 @@ const router = express.Router();
 
 router.use(protectedRoute);
 router.get("/", getAllCategories); //get all category
-router.post("/create", adminOnly, createProductCategory); //create category
-router.delete("/delete/:id", adminOnly, deleteProductCategory); //delete category
+router.post("/create", roleBasedAccess(["admin"]), createProductCategory); //create category
+router.delete("/delete/:id", roleBasedAccess(["admin"]), deleteProductCategory); //delete category
 
 export default router;

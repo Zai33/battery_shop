@@ -55,20 +55,3 @@ export const roleBasedAccess = (...allowedRoles) => {
     next(); // Proceed to the next middleware or route handler
   };
 };
-
-// Function to check if the user is an admin
-export const adminOnly = (req, res, next) => {
-  try {
-    // Check if the user is an admin
-    if (req.user.role !== "admin") {
-      return res.status(403).json({
-        con: false,
-        code: "FORBIDDEN",
-        message: "Forbidden, admin access only",
-      });
-    }
-    next(); // Proceed to the next middleware or route handler
-  } catch (error) {
-    return next(error);
-  }
-};

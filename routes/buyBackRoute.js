@@ -1,5 +1,8 @@
 import express from "express";
-import { adminOnly, protectedRoute } from "../middlewares/protectedRoute.js";
+import {
+  protectedRoute,
+  roleBasedAccess,
+} from "../middlewares/protectedRoute.js";
 import {
   createBuyBack,
   deleteBuyBackById,
@@ -15,7 +18,12 @@ const router = express.Router();
 router.get("/", protectedRoute, getAllBuyBacks); // Get all buy-backs
 router.get("/:id", protectedRoute, getBuyBackById); // Get buy-back by ID
 router.post("/create", protectedRoute, createBuyBack); //create buyback
-router.delete("/delete/:id", protectedRoute, adminOnly, deleteBuyBackById); //delete buy-back by ID
+router.delete(
+  "/delete/:id",
+  protectedRoute,
+  roleBasedAccess(["admin"]),
+  deleteBuyBackById,
+); //delete buy-back by ID
 router.patch("/update/:id", protectedRoute, updateBuyBack); //update buy-back by ID
 router.get("/verify/:id", verifyBuyBack); //verify buyback
 
